@@ -43,3 +43,29 @@ teardown() {
     run diffdir /tmp/src /tmp/dest
     assert_failure
 }
+
+@test "diff 01" {
+    mkdir -p /tmp/src/src /tmp/dest/dest
+    echo "Hello World!" > /tmp/src/hello
+    echo "Hello World!" > /tmp/dest/hello
+    run diffdir /tmp/src /tmp/dest
+    assert_failure
+}
+
+@test "diff 02" {
+    mkdir -p /tmp/src /tmp/dest
+    echo "Hello World!" > /tmp/src/hello
+    echo "Hello World!" > /tmp/dest/hello
+    echo "Bye World!"   > /tmp/dest/bye
+    run diffdir /tmp/src /tmp/dest
+    assert_failure
+}
+
+@test "diff 03" {
+    mkdir -p /tmp/src /tmp/dest
+    echo "Hello World!" > /tmp/src/hello
+    echo "Bye World!"   > /tmp/src/bye
+    echo "Hello World!" > /tmp/dest/hello
+    run diffdir /tmp/src /tmp/dest
+    assert_failure
+}
