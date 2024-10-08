@@ -6,6 +6,10 @@ setup() {
     PATH="$CURRENT_DIR/..:$PATH"
 }
 
+teardown() {
+    rm -rf /tmp/src /tmp/dest
+}
+
 @test "show Usage" {
     run diffdir
     assert_output "Usage: $CURRENT_DIR/../diffdir <source_directory> <destination_directory>"
@@ -21,5 +25,21 @@ setup() {
 @test "destination directory does not exist" {
     run diffdir / /ThisFolderDoseNotExist
     assert_output "Error: Destination Directory /ThisFolderDoseNotExist does not exist."
+    assert_failure
+}
+
+@test "no diff 00" {
+    mkdir -p /tmp/src /tmp/dest
+    echo "Hello World!" > /tmp/src/hello
+    echo "Hello World!" > /tmp/dest/hello
+    run diffdir /tmp/src /tmp/dest
+    assert_success
+}
+
+@test "diff 00" {
+    mkdir -p /tmp/src /tmp/dest
+    echo "Hello World!" > /tmp/src/hello
+    echo "Hello Earth!" > /tmp/dest/hello
+    run diffdir /tmp/src /tmp/dest
     assert_failure
 }

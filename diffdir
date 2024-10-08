@@ -30,7 +30,7 @@ fi
 
 EXIT_CODE=0
 
-find "$SOURCE_DIR" -type f | while read -r FILE_IN_SOURCE_DIR; do
+while read -r FILE_IN_SOURCE_DIR; do
     FILE_IN_DESTINATION_DIR="${FILE_IN_SOURCE_DIR/$SOURCE_DIR/$DESTINATION_DIR}"
 
     # Check if the corresponding file exists in the destination directory
@@ -45,6 +45,6 @@ find "$SOURCE_DIR" -type f | while read -r FILE_IN_SOURCE_DIR; do
         echo "File $FILE_IN_DESTINATION_DIR does not exist in directory $DESTINATION_DIR."
         EXIT_CODE=1
     fi
-done
+done < <(find "$SOURCE_DIR" -type f)
 
 exit $EXIT_CODE
