@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # diffdir - A script to compare files in two directories
 #
