@@ -28,6 +28,8 @@ if [ ! -d "$DESTINATION_DIR" ]; then
     exit 1
 fi
 
+EXIT_CODE=0
+
 find "$SOURCE_DIR" -type f | while read -r FILE_IN_SOURCE_DIR; do
     FILE_IN_DESTINATION_DIR="${FILE_IN_SOURCE_DIR/$SOURCE_DIR/$DESTINATION_DIR}"
 
@@ -37,10 +39,12 @@ find "$SOURCE_DIR" -type f | while read -r FILE_IN_SOURCE_DIR; do
             :
 	    else
             echo "File $FILE_IN_SOURCE_DIR and $FILE_IN_DESTINATION_DIR are different"
-            exit 1
+            EXIT_CODE=1
         fi
     else
         echo "File $FILE_IN_DESTINATION_DIR does not exist in directory $DESTINATION_DIR."
-        exit 1
+        EXIT_CODE=1
     fi
 done
+
+exit $EXIT_CODE
