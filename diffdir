@@ -18,13 +18,13 @@ DESTINATION_DIR=$2
 
 # Check if the source directory exists
 if [ ! -d "$SOURCE_DIR" ]; then
-    echo "Error: Directory $SOURCE_DIR does not exist."
+    echo "Error: Source Directory $SOURCE_DIR does not exist."
     exit 1
 fi
 
 # Check if the destination directory exists
 if [ ! -d "$DESTINATION_DIR" ]; then
-    echo "Error: Directory $DESTINATION_DIR does not exist."
+    echo "Error: Destination Directory $DESTINATION_DIR does not exist."
     exit 1
 fi
 

@@ -9,4 +9,17 @@ setup() {
 @test "show Usage" {
     run diffdir
     assert_output "Usage: $CURRENT_DIR/../diffdir <source_directory> <destination_directory>"
+    assert_failure
+}
+
+@test "source directory does not exist" {
+    run diffdir /ThisFolderDoseNotExist /
+    assert_output "Error: Source Directory /ThisFolderDoseNotExist does not exist."
+    assert_failure
+}
+
+@test "destination directory does not exist" {
+    run diffdir / /ThisFolderDoseNotExist
+    assert_output "Error: Destination Directory /ThisFolderDoseNotExist does not exist."
+    assert_failure
 }
