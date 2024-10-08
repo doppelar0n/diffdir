@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Ensure exactly two arguments (source and destination directory paths) are provided
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <source_directory> <destination_directory>"
+    exit 1
+fi
+
+# Assign the arguments to meaningful variable names
+SOURCE_DIR=$1
+DESTINATION_DIR=$2
+
+# Check if the source directory exists
+if [ ! -d "$SOURCE_DIR" ]; then
+    echo "Error: Directory $SOURCE_DIR does not exist."
+    exit 1
+fi
+
+# Check if the destination directory exists
+if [ ! -d "$DESTINATION_DIR" ]; then
+    echo "Error: Directory $DESTINATION_DIR does not exist."
+    exit 1
+fi
+
+find "$SOURCE_DIR" -type f | while read -r FILE_IN_SOURCE_DIR; do
+    FILE_IN_DESTINATION_DIR="${FILE_IN_SOURCE_DIR/$SOURCE_DIR/$DESTINATION_DIR}"
+
+    # Check if the corresponding file exists in the destination directory
+    if [ -f "$FILE_IN_DESTINATION_DIR" ]; then
+        if diff "$FILE_IN_SOURCE_DIR" "$FILE_IN_DESTINATION_DIR" > /dev/null; then
+            :
+	    else
+            echo "File $FILE_IN_SOURCE_DIR and $FILE_IN_DESTINATION_DIR are different"
+            exit 1
+        fi
+    else
+        echo "File $FILE_IN_DESTINATION_DIR does not exist in directory $DESTINATION_DIR."
+        exit 1
+    fi
+done
