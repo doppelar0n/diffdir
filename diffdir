@@ -1,4 +1,10 @@
 #!/bin/bash
+#
+# diffdir - A script to compare files in two directories
+#
+# GitHub: https://github.com/doppelar0n/diffdir
+# License: MIT
+#
 
 # Ensure exactly two arguments (source and destination directory paths) are provided
 if [ "$#" -ne 2 ]; then
