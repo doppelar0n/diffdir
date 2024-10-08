@@ -10,6 +10,7 @@ A Bash script to compare files in two directories
 
 ### Test
 
+Run test with:
 ```bash
-./test/bats/bin/bats test/test_diffdir.bats 
+docker run -it -v "$PWD:/code" bats/bats:latest /code/test
 ```
