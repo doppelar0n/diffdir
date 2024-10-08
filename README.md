@@ -7,3 +7,9 @@ A Bash script to compare files in two directories
 ```bash
 ./diffdir <source_directory> <destination_directory>
 ```
+
+### Test
+
+```bash
+./test/bats/bin/bats test/test_diffdir.bats 
+```
