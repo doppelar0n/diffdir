@@ -11,10 +11,10 @@ usage() {
     echo "Usage: $0 <source_directory> <destination_directory> [OPTIONS]"
     echo
     echo "Options:"
-    echo "  --fast-fail             Enable fast fail"
-    echo "  --find-type <string>    Specify the find types (Default: fd)"
-    echo "  --ignore-dest-extras    Ignore extras files or subdirs in the destination dir"
-    echo "  -h, --help              Display this help message"
+    echo "  --fast-fail             Enable fast fail. If a difference is found, the script will exit immediately."
+    echo "  --find-type <string>    Specify the types to find in the directory. Default is `fd` (files and directories)."
+    echo "  --ignore-dest-extras    Ignore extra files or subdirectories in the destination directory."
+    echo "  -h, --help              Display this help message."
 }
 
 # Use getopt for option processing
