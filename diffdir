@@ -6,16 +6,80 @@
 # License: MIT
 #
 
-# Ensure exactly two arguments (source and destination directory paths) are provided
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <source_directory> <destination_directory>"
+# Helper function to display usage
+usage() {
+    echo "Usage: $0 <source_directory> <destination_directory> [OPTIONS]"
+    echo
+    echo "Options:"
+    echo "  --fast-fail             Enable fast fail"
+    echo "  --find-type <string>    Specify the find types (Default: fd)"
+    echo "  --ignore-dest-extras    Ignore extras files or subdirs in the destination dir"
+    echo "  -h, --help              Display this help message"
+}
+
+# Use getopt for option processing
+OPTIONS=$(getopt -o h --long fast-fail,find-type:,ignore-dest-extras,help -- "$@")
+eval set -- "$OPTIONS"
+
+# Assign the arguments to meaningful variable names
+FAST_FAIL=false
+FIND_TYPE="fd"
+IGNORE_DEST_EXTRAS=false
+
+while true; do
+  case "$1" in
+    --fast-fail)
+      FAST_FAIL=true
+      shift
+      ;;
+    --find-type)
+      FIND_TYPE=$2
+      shift 2
+      ;;
+    --ignore-dest-extras)
+      IGNORE_DEST_EXTRAS=true
+      shift
+      ;;
+     -h|--help)
+      usage
+      exit 0
+      shift
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+SOURCE_DIR=$1
+DESTINATION_DIR=$2
+
+# Ensure two arguments
+if [ "$#" -lt 2 ]; then
+    usage
     exit 1
 fi
 
-# Assign the arguments to meaningful variable names
-SOURCE_DIR=$1
-DESTINATION_DIR=$2
-FAST_FAIL=false
+# Check if source_directory is empty
+if [ -z "$SOURCE_DIR" ]; then
+    echo "Error: Source directory is empty."
+    usage
+    exit 1
+fi
+
+# Check if destination_directory is empty
+if [ -z "$DESTINATION_DIR" ]; then
+    echo "Error: Destination directory is empty."
+    usage
+    exit 1
+fi
+
+EXIT_CODE=0
+FIND_CONDITION=""
 
 # Check if the source directory exists
 if [ ! -d "$SOURCE_DIR" ]; then
@@ -29,33 +93,30 @@ if [ ! -d "$DESTINATION_DIR" ]; then
     exit 1
 fi
 
-EXIT_CODE=0
+if [ "$IGNORE_DEST_EXTRAS" = false ] ; then
+    for type in $(echo $FIND_TYPE | fold -w1); do
+        case "$type" in
+            f) FIND_CONDITION="$FIND_CONDITION -type f -o" ;;
+            d) FIND_CONDITION="$FIND_CONDITION -type d -o" ;;
+            l) FIND_CONDITION="$FIND_CONDITION -type l -o" ;;
+            c) FIND_CONDITION="$FIND_CONDITION -type c -o" ;;
+            b) FIND_CONDITION="$FIND_CONDITION -type b -o" ;;
+            p) FIND_CONDITION="$FIND_CONDITION -type p -o" ;;
+            s) FIND_CONDITION="$FIND_CONDITION -type s -o" ;;
+            *) echo "Unknown find -type: $type"; exit 1 ;;
+        esac
+    done
 
-FIND_TYPE="fd"
-FIND_CONDITION=""
+    FIND_CONDITION=${FIND_CONDITION::-3}
 
-for type in $(echo $FIND_TYPE | fold -w1); do
-    case "$type" in
-        f) FIND_CONDITION="$FIND_CONDITION -type f -o" ;;
-        d) FIND_CONDITION="$FIND_CONDITION -type d -o" ;;
-        l) FIND_CONDITION="$FIND_CONDITION -type l -o" ;;
-        c) FIND_CONDITION="$FIND_CONDITION -type c -o" ;;
-        b) FIND_CONDITION="$FIND_CONDITION -type b -o" ;;
-        p) FIND_CONDITION="$FIND_CONDITION -type p -o" ;;
-        s) FIND_CONDITION="$FIND_CONDITION -type s -o" ;;
-        *) echo "Unknown find -type: $type"; exit 1 ;;
-    esac
-done
-
-FIND_CONDITION=${FIND_CONDITION::-3}
-
-# Check if listings from both directories are identical
-if diff <(find "$SOURCE_DIR" \( $FIND_CONDITION \)|sed "s|$SOURCE_DIR||") <(find "$DESTINATION_DIR" \( $FIND_CONDITION \)|sed "s|$DESTINATION_DIR||") > /dev/null; then
-    :
-else
-    echo "Differences between the $SOURCE_DIR and $DESTINATION_DIR found."
-    diff <(find "$SOURCE_DIR" \( $FIND_CONDITION \)|sed "s|$SOURCE_DIR||") <(find "$DESTINATION_DIR" \( $FIND_CONDITION \)|sed "s|$DESTINATION_DIR||")
-    exit 1
+    # Check if listings from both directories are identical
+    if diff <(find "$SOURCE_DIR" \( $FIND_CONDITION \)|sed "s|$SOURCE_DIR||") <(find "$DESTINATION_DIR" \( $FIND_CONDITION \)|sed "s|$DESTINATION_DIR||") > /dev/null; then
+        :
+    else
+        echo "Differences Files/Subdirectories between the $SOURCE_DIR and $DESTINATION_DIR found."
+        diff <(find "$SOURCE_DIR" \( $FIND_CONDITION \)|sed "s|$SOURCE_DIR||") <(find "$DESTINATION_DIR" \( $FIND_CONDITION \)|sed "s|$DESTINATION_DIR||")
+        exit 1
+    fi
 fi
 
 while read -r FILE_IN_SOURCE_DIR; do
