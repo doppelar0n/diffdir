@@ -14,17 +14,19 @@ usage() {
     echo "  --fast-fail             Enable fast fail. If a difference is found, the script will exit immediately."
     echo "  --find-type <string>    Specify the types to find in the directory. Default is `fd` (files and directories)."
     echo "  --ignore-dest-extras    Ignore extra files or subdirectories in the destination directory."
+    echo "  --ignore-files <regex>  If a filepath match this regex it will be ignored."
     echo "  -h, --help              Display this help message."
 }
 
 # Use getopt for option processing
-OPTIONS=$(getopt -o h --long fast-fail,find-type:,ignore-dest-extras,help -- "$@")
+OPTIONS=$(getopt -o h --long fast-fail,find-type:,ignore-dest-extras,ignore-files:,help -- "$@")
 eval set -- "$OPTIONS"
 
 # Assign the arguments to meaningful variable names
 FAST_FAIL=false
 FIND_TYPE="fd"
 IGNORE_DEST_EXTRAS=false
+IGNORE_FILE_REGEX=""
 
 while true; do
   case "$1" in
@@ -39,6 +41,10 @@ while true; do
     --ignore-dest-extras)
       IGNORE_DEST_EXTRAS=true
       shift
+      ;;
+    --ignore-files)
+      IGNORE_FILE_REGEX=$2
+      shift 2
       ;;
      -h|--help)
       usage
@@ -79,7 +85,6 @@ if [ -z "$DESTINATION_DIR" ]; then
 fi
 
 EXIT_CODE=0
-FIND_CONDITION=""
 
 # Check if the source directory exists
 if [ ! -d "$SOURCE_DIR" ]; then
@@ -94,6 +99,8 @@ if [ ! -d "$DESTINATION_DIR" ]; then
 fi
 
 if [ "$IGNORE_DEST_EXTRAS" = false ] ; then
+    FIND_CONDITION=""
+
     for type in $(echo $FIND_TYPE | fold -w1); do
         case "$type" in
             f) FIND_CONDITION="$FIND_CONDITION -type f -o" ;;
@@ -109,14 +116,29 @@ if [ "$IGNORE_DEST_EXTRAS" = false ] ; then
 
     FIND_CONDITION=${FIND_CONDITION::-3}
 
+    SOURCE_FIND_COMMAND="find \"$SOURCE_DIR\" \( $FIND_CONDITION \)|sed \"s|$SOURCE_DIR||\""
+    if [ -n "$IGNORE_FILE_REGEX" ]; then
+        SOURCE_FIND_COMMAND+="|grep -v -E \"$IGNORE_FILE_REGEX\""
+    fi
+
+    DESTINATION_FIND_COMMAND="find \"$DESTINATION_DIR\" \( $FIND_CONDITION \)|sed \"s|$DESTINATION_DIR||\""
+    if [ -n "$IGNORE_FILE_REGEX" ]; then
+        DESTINATION_FIND_COMMAND+="|grep -v -E \"$IGNORE_FILE_REGEX\""
+    fi
+
     # Check if listings from both directories are identical
-    if diff <(find "$SOURCE_DIR" \( $FIND_CONDITION \)|sed "s|$SOURCE_DIR||") <(find "$DESTINATION_DIR" \( $FIND_CONDITION \)|sed "s|$DESTINATION_DIR||") > /dev/null; then
+    if diff <(eval "$SOURCE_FIND_COMMAND") <(eval "$DESTINATION_FIND_COMMAND") > /dev/null; then
         :
     else
         echo "Differences Files/Subdirectories between the $SOURCE_DIR and $DESTINATION_DIR found."
-        diff <(find "$SOURCE_DIR" \( $FIND_CONDITION \)|sed "s|$SOURCE_DIR||") <(find "$DESTINATION_DIR" \( $FIND_CONDITION \)|sed "s|$DESTINATION_DIR||")
+        diff <(eval "$SOURCE_FIND_COMMAND") <(eval "$DESTINATION_FIND_COMMAND")
         exit 1
     fi
+fi
+
+SOURCE_FIND_COMMAND_TYPE_F="find \"$SOURCE_DIR\" -type f"
+if [ -n "$IGNORE_FILE_REGEX" ]; then
+    SOURCE_FIND_COMMAND_TYPE_F+="|grep -v -E \"$IGNORE_FILE_REGEX\""
 fi
 
 while read -r FILE_IN_SOURCE_DIR; do
@@ -140,6 +162,6 @@ while read -r FILE_IN_SOURCE_DIR; do
         fi
         EXIT_CODE=1
     fi
-done < <(find "$SOURCE_DIR" -type f)
+done < <(eval "$SOURCE_FIND_COMMAND_TYPE_F")
 
 exit $EXIT_CODE

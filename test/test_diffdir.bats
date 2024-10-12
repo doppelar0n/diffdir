@@ -132,6 +132,24 @@ teardown() {
     assert_success
 }
 
+@test "diff extra file in dest --ignore-files" {
+    mkdir -p /tmp/src /tmp/dest
+    echo "Hello World!" > /tmp/src/hello
+    echo "Hello World!" > /tmp/dest/hello
+    echo "Bye World!"   > /tmp/dest/bye
+    run diffdir /tmp/src /tmp/dest --ignore-files "bye$"
+    assert_success
+}
+
+@test "diff extra file in dest --ignore-files fail regex" {
+    mkdir -p /tmp/src /tmp/dest
+    echo "Hello World!" > /tmp/src/hello
+    echo "Hello World!" > /tmp/dest/hello
+    echo "Bye World!"   > /tmp/dest/bye
+    run diffdir /tmp/src /tmp/dest --ignore-files "byebye$"
+    assert_failure
+}
+
 @test "diff extra file in src" {
     mkdir -p /tmp/src /tmp/dest
     echo "Hello World!" > /tmp/src/hello
@@ -139,6 +157,18 @@ teardown() {
     echo "Hello World!" > /tmp/dest/hello
     run diffdir /tmp/src /tmp/dest
     assert_failure
+}
+
+@test "diff --ignore-files img and json" {
+    mkdir -p /tmp/src /tmp/dest
+    echo "Hello World!" > /tmp/src/hello
+    echo "Bye World!"   > /tmp/src/bye.img
+    echo "Bye World!"   > /tmp/src/bye.json
+    echo "Hello World!" > /tmp/dest/hello
+    echo "Bye Earth!"   > /tmp/dest/bye.img
+    echo "Bye Earth!"   > /tmp/dest/bye.json
+    run diffdir /tmp/src /tmp/dest --ignore-files "\.img$|\.json$"
+    assert_success
 }
 
 @test "no diff special chars" {

@@ -30,6 +30,7 @@ Run the script with the following parameters:
 - `--fast-fail`: Enable fast fail. If a difference is found, the script will exit immediately.
 - `--find-type <string>`: Specify the types to find in the directory. Default is `fd` (files and directories).
 - `--ignore-dest-extras`: Ignore extra files or subdirectories in the destination directory.
+- `--ignore-files <regex>`: If a filepath match this regex it will be ignored.
 - `-h`, `--help`: Display help message.
 
 ### Example
