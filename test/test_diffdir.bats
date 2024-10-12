@@ -171,6 +171,26 @@ teardown() {
     assert_success
 }
 
+@test "diff fail --ignore-files .*tmp.*" {
+    mkdir -p /tmp/src /tmp/dest
+    echo "Hello World!" > /tmp/src/hello
+    echo "Hello World!" > /tmp/src/abtmp12
+    echo "Hello Earth!" > /tmp/dest/hello
+    echo "Hello Earth!" > /tmp/dest/abtmp12
+    run diffdir /tmp/src /tmp/dest --ignore-files ".*tmp.*"
+    assert_failure
+}
+
+@test "diff suc --ignore-files .*tmp.*" {
+    mkdir -p /tmp/src /tmp/dest
+    echo "Hello World!" > /tmp/src/hello
+    echo "Hello World!" > /tmp/src/abtmp12
+    echo "Hello World!" > /tmp/dest/hello
+    echo "Hello Earth!" > /tmp/dest/abtmp12
+    run diffdir /tmp/src /tmp/dest --ignore-files ".*tmp.*"
+    assert_success
+}
+
 @test "no diff special chars" {
     mkdir -p /tmp/src /tmp/dest '/tmp/src/@#$_&-+*~^`[]{}|!() ;:"<>,./?end' '/tmp/dest/@#$_&-+*~^`[]{}|!() ;:"<>,./?end'
     echo "Hello World!"  > /tmp/src/hello

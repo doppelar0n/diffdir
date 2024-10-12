@@ -11,10 +11,10 @@ usage() {
     echo "Usage: $0 <source_directory> <destination_directory> [OPTIONS]"
     echo
     echo "Options:"
-    echo "  --fast-fail             Enable fast fail. If a difference is found, the script will exit immediately."
-    echo "  --find-type <string>    Specify the types to find in the directory. Default is `fd` (files and directories)."
+    echo "  --fast-fail             Enable fast fail. If a difference is found, the script exits immediately. Helpful for scripts."
+    echo "  --find-type <string>    Specify the types to find in the directory. The default is `fd` (files and directories)."
     echo "  --ignore-dest-extras    Ignore extra files or subdirectories in the destination directory."
-    echo "  --ignore-files <regex>  If a filepath match this regex it will be ignored."
+    echo "  --ignore-files <regex>  Ignore files or paths matching this regex pattern."
     echo "  -h, --help              Display this help message."
 }
 
@@ -137,30 +137,32 @@ if [ "$IGNORE_DEST_EXTRAS" = false ] ; then
 fi
 
 SOURCE_FIND_COMMAND_TYPE_F="find \"$SOURCE_DIR\" -type f"
-if [ -n "$IGNORE_FILE_REGEX" ]; then
-    SOURCE_FIND_COMMAND_TYPE_F+="|grep -v -E \"$IGNORE_FILE_REGEX\""
-fi
 
 while read -r FILE_IN_SOURCE_DIR; do
     FILE_IN_DESTINATION_DIR="${FILE_IN_SOURCE_DIR/$SOURCE_DIR/$DESTINATION_DIR}"
+    FILE_SUB_PATH="${FILE_IN_SOURCE_DIR/$SOURCE_DIR/}"
 
-    # Check if the corresponding file exists in the destination directory
-    if [ -f "$FILE_IN_DESTINATION_DIR" ]; then
-        if diff "$FILE_IN_SOURCE_DIR" "$FILE_IN_DESTINATION_DIR" > /dev/null; then
-            :
-	    else
-            echo "File $FILE_IN_SOURCE_DIR and $FILE_IN_DESTINATION_DIR are different"
+    if [ -n "$IGNORE_FILE_REGEX" ] && [[ $FILE_SUB_PATH =~ $IGNORE_FILE_REGEX ]]; then
+        :
+    else
+        # Check if the corresponding file exists in the destination directory
+        if [ -f "$FILE_IN_DESTINATION_DIR" ]; then
+            if diff "$FILE_IN_SOURCE_DIR" "$FILE_IN_DESTINATION_DIR" > /dev/null; then
+                :
+            else
+                echo "File $FILE_IN_SOURCE_DIR and $FILE_IN_DESTINATION_DIR are different"
+                if [ "$FAST_FAIL" = true ] ; then
+                    exit 1
+                fi
+                EXIT_CODE=1
+            fi
+        else
+            echo "File $FILE_IN_DESTINATION_DIR does not exist in directory $DESTINATION_DIR."
             if [ "$FAST_FAIL" = true ] ; then
                 exit 1
             fi
             EXIT_CODE=1
         fi
-    else
-        echo "File $FILE_IN_DESTINATION_DIR does not exist in directory $DESTINATION_DIR."
-        if [ "$FAST_FAIL" = true ] ; then
-            exit 1
-        fi
-        EXIT_CODE=1
     fi
 done < <(eval "$SOURCE_FIND_COMMAND_TYPE_F")
 
