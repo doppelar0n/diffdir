@@ -140,3 +140,13 @@ teardown() {
     run diffdir /tmp/src /tmp/dest
     assert_failure
 }
+
+@test "no diff special chars" {
+    mkdir -p /tmp/src /tmp/dest '/tmp/src/@#$_&-+*~^`[]{}|!() ;:"<>,./?end' '/tmp/dest/@#$_&-+*~^`[]{}|!() ;:"<>,./?end'
+    echo "Hello World!"  > /tmp/src/hello
+    echo "My File With Spaces & Special#Chars\!_123@ok" > '/tmp/src/@#$_&-+*~^`[]{}|!() ;:"<>,./?end/ _!@#$%^&*()_+[]{}|;:,.<>?~`"'
+    echo "Hello World!"  > /tmp/dest/hello
+    echo "My File With Spaces & Special#Chars\!_123@ok" > '/tmp/dest/@#$_&-+*~^`[]{}|!() ;:"<>,./?end/ _!@#$%^&*()_+[]{}|;:,.<>?~`"'
+    run diffdir /tmp/src /tmp/dest
+    assert_success
+}
