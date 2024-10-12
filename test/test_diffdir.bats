@@ -183,6 +183,18 @@ teardown() {
     assert_success
 }
 
+@test "diff --ignore-files env and json src and dest dir with / at end" {
+    mkdir -p /tmp/src /tmp/dest
+    echo "Hello World!" > /tmp/src/hello
+    echo "Bye World!"   > /tmp/src/.env.local
+    echo "Bye World!"   > /tmp/src/local.json
+    echo "Hello World!" > /tmp/dest/hello
+    echo "Bye Earth!"   > /tmp/dest/.env.local
+    echo "Bye Earth!"   > /tmp/dest/local.json
+    run diffdir /tmp/src/ /tmp/dest/ --ignore-files "^/\.env\.local$|^/local\.json$"
+    assert_success
+}
+
 @test "diff fail --ignore-files env and json and subdir" {
     mkdir -p /tmp/src/ok /tmp/dest/ok
     echo "Hello World!" > /tmp/src/hello

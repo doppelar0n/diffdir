@@ -64,6 +64,14 @@ done
 SOURCE_DIR=$1
 DESTINATION_DIR=$2
 
+# Remove the trailing slash if it exists for the source and destination directory
+if [[ "$SOURCE_DIR" =~ ./$ ]]; then
+    SOURCE_DIR="${SOURCE_DIR%?}"
+fi
+if [[ "$DESTINATION_DIR" =~ ./$ ]]; then
+    DESTINATION_DIR="${DESTINATION_DIR%?}"
+fi
+
 # Ensure two arguments
 if [ "$#" -lt 2 ]; then
     usage
