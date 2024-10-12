@@ -17,18 +17,18 @@ teardown() {
 }
 
 @test "source directory does not exist" {
-    run diffdir /ThisFolderDoseNotExist /
-    assert_output "Error: Source Directory /ThisFolderDoseNotExist does not exist."
+    run diffdir /ThisDirDoseNotExist /
+    assert_output "Error: Source Directory /ThisDirDoseNotExist does not exist."
     assert_failure
 }
 
 @test "destination directory does not exist" {
-    run diffdir / /ThisFolderDoseNotExist
-    assert_output "Error: Destination Directory /ThisFolderDoseNotExist does not exist."
+    run diffdir / /ThisDirDoseNotExist
+    assert_output "Error: Destination Directory /ThisDirDoseNotExist does not exist."
     assert_failure
 }
 
-@test "no diff 00" {
+@test "no diff" {
     mkdir -p /tmp/src /tmp/dest
     echo "Hello World!" > /tmp/src/hello
     echo "Hello World!" > /tmp/dest/hello
@@ -36,7 +36,7 @@ teardown() {
     assert_success
 }
 
-@test "diff 00" {
+@test "diff in dest file" {
     mkdir -p /tmp/src /tmp/dest
     echo "Hello World!" > /tmp/src/hello
     echo "Hello Earth!" > /tmp/dest/hello
@@ -44,7 +44,7 @@ teardown() {
     assert_failure
 }
 
-@test "diff 01" {
+@test "diff dir name in both" {
     mkdir -p /tmp/src/src /tmp/dest/dest
     echo "Hello World!" > /tmp/src/hello
     echo "Hello World!" > /tmp/dest/hello
@@ -52,7 +52,7 @@ teardown() {
     assert_failure
 }
 
-@test "diff 02" {
+@test "diff extra file in dest" {
     mkdir -p /tmp/src /tmp/dest
     echo "Hello World!" > /tmp/src/hello
     echo "Hello World!" > /tmp/dest/hello
@@ -61,7 +61,7 @@ teardown() {
     assert_failure
 }
 
-@test "diff 03" {
+@test "diff extra file in src" {
     mkdir -p /tmp/src /tmp/dest
     echo "Hello World!" > /tmp/src/hello
     echo "Bye World!"   > /tmp/src/bye

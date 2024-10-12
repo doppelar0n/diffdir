@@ -30,6 +30,33 @@ fi
 
 EXIT_CODE=0
 
+FIND_TYPE="fd"
+FIND_CONDITION=""
+
+for type in $(echo $FIND_TYPE | fold -w1); do
+    case "$type" in
+        f) FIND_CONDITION="$FIND_CONDITION -type f -o" ;;
+        d) FIND_CONDITION="$FIND_CONDITION -type d -o" ;;
+        l) FIND_CONDITION="$FIND_CONDITION -type l -o" ;;
+        c) FIND_CONDITION="$FIND_CONDITION -type c -o" ;;
+        b) FIND_CONDITION="$FIND_CONDITION -type b -o" ;;
+        p) FIND_CONDITION="$FIND_CONDITION -type p -o" ;;
+        s) FIND_CONDITION="$FIND_CONDITION -type s -o" ;;
+        *) echo "Unknown find -type: $type"; exit 1 ;;
+    esac
+done
+
+FIND_CONDITION=${FIND_CONDITION::-3}
+
+# Check if listings from both directories are identical
+if diff <(find "$SOURCE_DIR" \( $FIND_CONDITION \)|sed "s|$SOURCE_DIR||") <(find "$DESTINATION_DIR" \( $FIND_CONDITION \)|sed "s|$DESTINATION_DIR||") > /dev/null; then
+    :
+else
+    echo "Differences between the $SOURCE_DIR and $DESTINATION_DIR found."
+    diff <(find "$SOURCE_DIR" \( $FIND_CONDITION \)|sed "s|$SOURCE_DIR||") <(find "$DESTINATION_DIR" \( $FIND_CONDITION \)|sed "s|$DESTINATION_DIR||")
+    EXIT_CODE=1
+fi
+
 while read -r FILE_IN_SOURCE_DIR; do
     FILE_IN_DESTINATION_DIR="${FILE_IN_SOURCE_DIR/$SOURCE_DIR/$DESTINATION_DIR}"
 
