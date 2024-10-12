@@ -28,7 +28,7 @@ In both cases (diff+grep and rsync), you could theoretically count lines with `|
 
 With `diffdir`, you can simply do this:
 ```bash
-diffdir <source_directory> <destination_directory> --ignore-files "\.env\.local$|local\.json$"
+diffdir <source_directory> <destination_directory> --ignore-files "^/\.env\.local$|^/local\.json$"
 ```
 ...and you'll get the expected exit code!
 
@@ -81,6 +81,21 @@ Ignore all `.img` files:
 Ignore all `.png` and `.jpeg` files:
 ```bash
 ./diffdir /path/to/source_directory /path/to/destination_directory --ignore-files "\.png$|\.jpeg$"
+```
+
+Ignore all `.env.local` and `local.json` files in root directory:
+```bash
+diffdir <source_directory> <destination_directory> --ignore-files "^/\.env\.local$|^/local\.json$"
+```
+
+Ignore all `.env.local` and `local.json` files in all sub directory:
+```bash
+diffdir <source_directory> <destination_directory> --ignore-files "/\.env\.local$|/local\.json$"
+```
+
+Ignore all files that ends with `.env.local` or `local.json` in all sub directory:
+```bash
+diffdir <source_directory> <destination_directory> --ignore-files "\.env\.local$|local\.json$"
 ```
 
 Ignore any path containing `abc`. This will ignore `abc` in both source and destination directories, but only in sub-paths:

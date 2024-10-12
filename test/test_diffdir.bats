@@ -171,6 +171,48 @@ teardown() {
     assert_success
 }
 
+@test "diff --ignore-files env and json" {
+    mkdir -p /tmp/src /tmp/dest
+    echo "Hello World!" > /tmp/src/hello
+    echo "Bye World!"   > /tmp/src/.env.local
+    echo "Bye World!"   > /tmp/src/local.json
+    echo "Hello World!" > /tmp/dest/hello
+    echo "Bye Earth!"   > /tmp/dest/.env.local
+    echo "Bye Earth!"   > /tmp/dest/local.json
+    run diffdir /tmp/src /tmp/dest --ignore-files "^/\.env\.local$|^/local\.json$"
+    assert_success
+}
+
+@test "diff fail --ignore-files env and json and subdir" {
+    mkdir -p /tmp/src/ok /tmp/dest/ok
+    echo "Hello World!" > /tmp/src/hello
+    echo "Bye World!"   > /tmp/src/.env.local
+    echo "Bye World!"   > /tmp/src/ok/.env.local
+    echo "Bye World!"   > /tmp/src/ok/local.json
+    echo "Hello World!" > /tmp/dest/hello
+    echo "Bye Earth!"   > /tmp/dest/.env.local
+    echo "Bye Earth!"   > /tmp/dest/local.json
+    echo "Bye Earth!"   > /tmp/dest/ok/.env.local
+    echo "Bye Earth!"   > /tmp/dest/ok/local.json
+    run diffdir /tmp/src /tmp/dest --ignore-files "^/\.env\.local$|^/local\.json$"
+    assert_failure
+}
+
+@test "diff success --ignore-files env and json and subdir" {
+    mkdir -p /tmp/src/ok /tmp/dest/ok
+    echo "Hello World!" > /tmp/src/hello
+    echo "Bye World!"   > /tmp/src/.env.local
+    echo "Bye World!"   > /tmp/src/ok/.env.local
+    echo "Bye World!"   > /tmp/src/ok/local.json
+    echo "Hello World!" > /tmp/dest/hello
+    echo "Bye Earth!"   > /tmp/dest/.env.local
+    echo "Bye Earth!"   > /tmp/dest/local.json
+    echo "Bye Earth!"   > /tmp/dest/ok/.env.local
+    echo "Bye Earth!"   > /tmp/dest/ok/local.json
+    run diffdir /tmp/src /tmp/dest --ignore-files "/\.env\.local$|/local\.json$"
+    assert_success
+}
+
 @test "diff fail --ignore-files .*tmp.*" {
     mkdir -p /tmp/src /tmp/dest
     echo "Hello World!" > /tmp/src/hello
