@@ -46,7 +46,7 @@ cd diffdir
 Copy the program to /usr/local/bin/ to make it globally available:
 
 ```bash
-sudo mv diffdir /usr/local/bin/
+sudo cp diffdir /usr/local/bin/
 ```
 
 ## Usage
