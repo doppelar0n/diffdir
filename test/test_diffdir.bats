@@ -17,15 +17,15 @@ teardown() {
 }
 
 @test "show --help" {
-    run diffdir
+    run diffdir --help
     assert_output --partial "Usage: $CURRENT_DIR/../diffdir <source_directory> <destination_directory> [OPTIONS]"
-    assert_failure
+    assert_success
 }
 
 @test "show -h" {
-    run diffdir
+    run diffdir -h
     assert_output --partial "Usage: $CURRENT_DIR/../diffdir <source_directory> <destination_directory> [OPTIONS]"
-    assert_failure
+    assert_success
 }
 
 @test "source directory does not exist" {
