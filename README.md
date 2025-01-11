@@ -124,6 +124,10 @@ Run test with:
 docker run -it -v "$PWD:/code" bats/bats:latest /code/test
 ```
 
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request with any enhancements or bug fixes.
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
